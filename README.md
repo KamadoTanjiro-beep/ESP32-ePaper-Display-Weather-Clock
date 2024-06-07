@@ -10,6 +10,7 @@
 6. Moon Phase, AQI, Sunrise, Sunset, Real Feel, Weather Data
 7. No need to modify the code, just upload it and it will automatically ask you to configure WIFI Settings using PC or Mobile, just chill.
 8. Houses a DS3231 for internal time trackings
+9. Clock updates every 15 mins and sleeps for the rest. (Configurations via web server coming soon, till then modify code)
    
 ## UPCOMING FEATURES
 1. Will update schematics.
