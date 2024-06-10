@@ -41,7 +41,8 @@ USB-C based operation.
 
 This clock runs on GxEPD2 Library and others. Weather icon credits: SeBassTian23
 
-Battery life: 1 Month and Still Running (To be updated later).
+Battery life: (06/05/2024) and still running (To be updated later).
+
 ## Picture(s)
 
 ![Clock](https://github.com/KamadoTanjiro-beep/epdWeatherClockV1/blob/main/epd.jpg)
