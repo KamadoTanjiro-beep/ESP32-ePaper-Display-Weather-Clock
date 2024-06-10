@@ -4,11 +4,12 @@
 ## Hardware
 1. Xiao ESP32 C3
 2. Waveshare 4.2inch TriColor 400x300 E-paper display refresh time 15 secs.
-3. BH1750
-4. DS3231
-5. BMP680
-6. ICR (LiCoO2) 2x2200mAh Lithium Battery (Simple 18650 batteries)
-7. 2xBMS (3.7V) CuttOff at 2.5V or Higher
+3. TMP117 (For temperature)
+4. BH1750 (For light sensing)
+5. DS3231 (For time keeping)
+6. BMP680 (For humidity & pressure)
+7. ICR (LiCoO2) 2x2200mAh Lithium Battery (Simple 18650 batteries)
+8. 2xBMS (3.7V) CuttOff at 2.5V or Higher
 9. Other stuffs like wire, capacitor (104), resistor (1M Ohm), connectors, switch, LED (1) etc.
 
 ## FEATURES V1.0.0 (New Features Coming Soon (Might take a year or so))
