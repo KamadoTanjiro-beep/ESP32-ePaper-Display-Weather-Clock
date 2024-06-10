@@ -1,6 +1,16 @@
 
 # Minimalistic E-Paper 4.2inch Display Weather Station
 
+## Hardware
+1. Xiao ESP32 C3
+2. Waveshare 4.2inch TriColor 400x300 E-paper display refresh time 15 secs.
+3. BH1750
+4. DS3231
+5. BMP680
+6. ICR (LiCoO2) 2x2200mAh Lithium Battery (Simple 18650 batteries)
+7. 2xBMS (3.7V) CuttOff at 2.5V or Higher
+9. Other stuffs like wire, capacitor (104), resistor (1M Ohm), connectors, switch, LED (1) etc.
+
 ## FEATURES V1.0.0 (New Features Coming Soon (Might take a year or so))
 1. Shows Room Temperature using Medical Grade Temperature Sensor TMP117.
 2. Humidty and Pressure using Bosch BME680
@@ -25,7 +35,7 @@ Also, it houses a LUX sensor (BH1750) for sleeping while it is dark (E-paper doe
 
 Made of old delivery card boards. :exploding_head: One-Punch Eco-Friendly Boost Ultra Pro Max :leaves: to :infinity:
 
-Supports 5V 500mA Charging.
+Supports 5V 500mA Charging (In-built from ESP32C3 Module)
 
 USB-C based operation.
 
