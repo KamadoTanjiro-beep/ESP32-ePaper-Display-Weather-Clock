@@ -42,7 +42,7 @@ USB-C based operation.
 
 This clock runs on GxEPD2 Library and others. Weather icon credits: SeBassTian23
 
-Battery life: 
+Battery life: <br>
 a. Full: 06/05/2024, Dead: To be updated
 
 ## Picture(s)
