@@ -26,6 +26,8 @@
 ## UPCOMING FEATURES
 Check [issues](https://github.com/KamadoTanjiro-beep/epdWeatherClockV1/issues)
 
+## Other Info
+
 Clock based on Waveshare 4.2inch e-Paper Module (B) 3-Colour, 400 × 300. :leaves: Eco-Friendly!
 
 The clock runs on a 2 x 2200mAh (4400mAh total) LiCoO2 cell ( :leaves: Not so Eco-Friendly!). 
