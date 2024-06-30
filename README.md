@@ -24,9 +24,7 @@
 9. Clock updates every 15 mins and sleeps for the rest. (Configurations via web server coming soon, till then modify code)
    
 ## UPCOMING FEATURES
-1. Will update schematics.
-2. Web based Weather Station configurations or Settings.
-3. 24 hour temperature-humidty curve
+Check [issues](https://github.com/KamadoTanjiro-beep/epdWeatherClockV1/issues)
 
 Clock based on Waveshare 4.2inch e-Paper Module (B) 3-Colour, 400 × 300. :leaves: Eco-Friendly!
 
