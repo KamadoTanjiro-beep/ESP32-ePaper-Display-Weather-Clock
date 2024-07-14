@@ -11,8 +11,12 @@
 7. ICR (LiCoO2) 2x2200mAh Lithium Battery (Simple 18650 batteries)
 8. 2xBMS (3.7V) CuttOff at 2.5V or Higher
 9. Other stuffs like wire, capacitor (104), resistor (1M Ohm), connectors, switch, LED (1) etc.
-
-## FEATURES V1.0.0 (New Features Coming Soon (Might take a year or so))
+    
+## FEATURES & UPDATES V0.1.1-alpha
+1. redefined battery setting variable for better understanding
+2. debug mode disabled due to instability (will be fixed later)
+3. battery critical mode added which turns off wifi, lowers cpu speed, and other UI changes when battery percent is less than 1
+## FEATURES V0.1.0-alpha
 1. Shows Room Temperature using Medical Grade Temperature Sensor TMP117.
 2. Humidty and Pressure using Bosch BME680
 3. Tracks High and Low
