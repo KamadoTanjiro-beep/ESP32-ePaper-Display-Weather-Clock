@@ -203,9 +203,15 @@ U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 int TIME_TO_SLEEP = 900;
 
+//battery related settings
+#define battChangeThreshold 0.3
+#define battFullVol 4.19
+#define battHigh 4.2
+#define battLow 2.75
+
 int nightFlag = 0;  //preserves data in rtc memory from deep sleep loss
 float battLevel;
-bool DEBUG_MODE = false;
+bool DEBUG_MODE = false, BATTERY_CRITICAL = false;
 
 String jsonBuffer;
 
@@ -236,8 +242,8 @@ void setup() {
   Serial.println("Setup");
   pinMode(BATPIN, INPUT);
   pinMode(DEBUG_PIN, INPUT);
-  if (digitalRead(DEBUG_PIN) == 1)
-    DEBUG_MODE = true;
+  /*if (digitalRead(DEBUG_PIN) == 1)
+    DEBUG_MODE = true;*/
   Wire.begin();
   Wire.setClock(400000);  // Set clock speed to be the fastest for better communication (fast mode)
 
@@ -247,11 +253,11 @@ void setup() {
 
   pref.begin("database", false);
   //preferences.end();
-  bool wifiConfigExist = pref.isKey("ssid");
-  if (!wifiConfigExist) {  //create key:value pairs
-    pref.putString("ssid", "");
-    pref.putString("password", "");
-  }
+  BATTERY_CRITICAL = pref.isKey("battCrit");
+  if (!BATTERY_CRITICAL)
+    pref.putBool("battCrit", "");
+  BATTERY_CRITICAL = pref.getBool("battCrit", false);
+  bool tempBATTERY_CRITICAL = BATTERY_CRITICAL;
 
   bool checkFlag = pref.isKey("nightFlag");
   if (!checkFlag) {  //create key:value pair
@@ -259,61 +265,65 @@ void setup() {
   }
   nightFlag = pref.getBool("nightFlag", false);
 
-  //pref.putString("ssid", "");
-  //pref.putString("password", "");
+  if (!BATTERY_CRITICAL) {
+    bool wifiConfigExist = pref.isKey("ssid");
+    if (!wifiConfigExist) {  //create key:value pairs
+      pref.putString("ssid", "");
+      pref.putString("password", "");
+    }
 
-  ssid = pref.getString("ssid", "");
-  password = pref.getString("password", "");
+    ssid = pref.getString("ssid", "");
+    password = pref.getString("password", "");
 
-  if (ssid == "" || password == "") {
-    Serial.println("No values saved for ssid or password");
-    // Connect to Wi-Fi network with SSID and password
-    Serial.println("Setting AP (Access Point)");
-    // NULL sets an open Access Point
-    WiFi.softAP("WCLOCK-WIFI-MANAGER", "79756622761");
+    if (ssid == "" || password == "") {
+      Serial.println("No values saved for ssid or password");
+      // Connect to Wi-Fi network with SSID and password
+      Serial.println("Setting AP (Access Point)");
+      // NULL sets an open Access Point
+      WiFi.softAP("WCLOCK-WIFI-MANAGER", "79756622761");
 
-    IPAddress IP = WiFi.softAPIP();
-    Serial.print("AP IP address: ");
-    Serial.println(IP);
+      IPAddress IP = WiFi.softAPIP();
+      Serial.print("AP IP address: ");
+      Serial.println(IP);
 
-    debugPrinter("Connect to 'WCLOCK-WIFI-MANAGER' \nfrom your phone or computer (Wifi).\nUse password 79756622761.\nThen go to " + IP.toString() + "\nfrom your browser.");
+      debugPrinter("Connect to 'WCLOCK-WIFI-MANAGER' \nfrom your phone or computer (Wifi).\nUse password 79756622761.\nThen go to " + IP.toString() + "\nfrom your browser.");
 
-    // Web Server Root URL
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
-      request->send(200, "text/html", index_html);
-    });
+      // Web Server Root URL
+      server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+        request->send(200, "text/html", index_html);
+      });
 
-    server.on("/", HTTP_POST, [](AsyncWebServerRequest* request) {
-      int params = request->params();
-      for (int i = 0; i < params; i++) {
-        AsyncWebParameter* p = request->getParam(i);
-        if (p->isPost()) {
-          // HTTP POST ssid value
-          if (p->name() == PARAM_INPUT_1) {
-            ssid = p->value();
-            Serial.print("SSID set to: ");
-            Serial.println(ssid);
-            pref.putString("ssid", ssid);
+      server.on("/", HTTP_POST, [](AsyncWebServerRequest* request) {
+        int params = request->params();
+        for (int i = 0; i < params; i++) {
+          const AsyncWebParameter* p = request->getParam(i);
+          if (p->isPost()) {
+            // HTTP POST ssid value
+            if (p->name() == PARAM_INPUT_1) {
+              ssid = p->value();
+              Serial.print("SSID set to: ");
+              Serial.println(ssid);
+              pref.putString("ssid", ssid);
+            }
+            // HTTP POST pass value
+            if (p->name() == PARAM_INPUT_2) {
+              password = p->value();
+              Serial.print("Password set to: ");
+              Serial.println(password);
+              pref.putString("password", password);
+            }
+            //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
           }
-          // HTTP POST pass value
-          if (p->name() == PARAM_INPUT_2) {
-            password = p->value();
-            Serial.print("Password set to: ");
-            Serial.println(password);
-            pref.putString("password", password);
-          }
-          //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
-      }
-      request->send(200, "text/html", "<h2>Done. Weather Station will now restart</h2>");
-      delay(3000);
-      ESP.restart();
-    });
-    server.begin();
-    while (true)
-      ;
+        request->send(200, "text/html", "<h2>Done. Weather Station will now restart</h2>");
+        delay(3000);
+        ESP.restart();
+      });
+      server.begin();
+      while (true)
+        ;
+    }
   }
-
   if (lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE)) {
     Serial.println(F("BH1750 Advanced begin"));
   } else {
@@ -373,11 +383,18 @@ void setup() {
     bme.setIIRFilterSize(BME680_FILTER_SIZE_7);
     bme.setGasHeater(0, 0);  // 0*C for 0 ms
 
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid.c_str(), password.c_str());
-    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      Serial.println("Connection Failed");
-      break;
+    if (!BATTERY_CRITICAL) {
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(ssid.c_str(), password.c_str());
+      while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+        Serial.println("Connection Failed");
+        break;
+      }
+    } else {
+      //wifioff cpu speed reduced
+      WiFi.disconnect(true);  // Disconnect from the network
+      WiFi.mode(WIFI_OFF);    // Switch WiFi off
+      setCpuFrequencyMhz(40);
     }
 
     hTemp = pref.getFloat("hTemp", -1.0);
@@ -444,6 +461,8 @@ void setup() {
         pref.putFloat("lTemp", lTemp);
       if (tempBattLevel != battLevel)
         pref.putFloat("battLevel", battLevel);
+      if (tempBATTERY_CRITICAL != BATTERY_CRITICAL)
+        pref.putBool("battCrit", BATTERY_CRITICAL);
     }
     if (tempNightFlag != nightFlag)
       pref.putBool("nightFlag", nightFlag);
@@ -518,7 +537,7 @@ void tempPrint(byte offset) {
   if (newBattLevel < battLevel)  //to maintain steady decrease in battery level
     battLevel = newBattLevel;
 
-  if (((newBattLevel - battLevel) >= 0.4) || newBattLevel > 4.19)  //to update the battery level in case of charging
+  if (((newBattLevel - battLevel) >= battChangeThreshold) || newBattLevel > battFullVol)  //to update the battery level in case of charging
     battLevel = newBattLevel;
 
   u8g2Fonts.setFont(u8g2_font_luRS08_tf);
@@ -526,12 +545,20 @@ void tempPrint(byte offset) {
   u8g2Fonts.print(battLevel, 2);
   u8g2Fonts.print("V");
 
-  int percent = ((battLevel - 3.0) / 1.2) * 100;  //range is 4.2-100% and 3.0-0%
-  if (percent < 1)
-    percent = 1;
+  int percent = ((battLevel - battLow) / (battHigh - battLow)) * 100;  //range is battHigh - 100% and battLow - 0%
+  BATTERY_CRITICAL = false;
+  if (percent < 1) {
+    BATTERY_CRITICAL = true;
+    percent = 0;  //for battry icon
+  } else if (percent > 100)
+    percent = 100;
+
   u8g2Fonts.setCursor(63, 11);
-  u8g2Fonts.print(percent, 1);
-  u8g2Fonts.print("%");
+  if (!BATTERY_CRITICAL) {
+    u8g2Fonts.print(percent, 1);
+    u8g2Fonts.print("%");
+  } else
+    u8g2Fonts.print("BATTERY CRITICAL, WIFI TURNED OFF");
   iconBattery(percent);
 
   DateTime now = rtc.now();
@@ -563,8 +590,19 @@ void tempPrint(byte offset) {
   u8g2Fonts.setCursor(330, 110 + offset);
   u8g2Fonts.print(String("C"));
 
-  display.drawLine(0, 121 + offset, 400, 121 + offset, GxEPD_RED);
-  display.drawLine(0, 122 + offset, 400, 122 + offset, GxEPD_RED);
+  if (!BATTERY_CRITICAL) {
+    display.drawLine(0, 121 + offset, 400, 121 + offset, GxEPD_RED);
+    display.drawLine(0, 122 + offset, 400, 122 + offset, GxEPD_RED);
+
+    display.drawLine(0, 154 + offset, 400, 154 + offset, GxEPD_RED);
+    display.drawLine(0, 155 + offset, 400, 155 + offset, GxEPD_RED);
+  } else {
+    display.drawLine(0, 121 + offset, 400, 121 + offset, GxEPD_BLACK);
+    display.drawLine(0, 122 + offset, 400, 122 + offset, GxEPD_BLACK);
+
+    display.drawLine(0, 154 + offset, 400, 154 + offset, GxEPD_BLACK);
+    display.drawLine(0, 155 + offset, 400, 155 + offset, GxEPD_BLACK);
+  }
 
   unsigned long endTime = bme.beginReading();
   if (endTime == 0) {
@@ -610,9 +648,6 @@ void tempPrint(byte offset) {
   u8g2Fonts.setFont(u8g2_font_logisoso16_tf);
   u8g2Fonts.setCursor(252, 148 + offset);  // start writing at this position
   u8g2Fonts.print("C");
-
-  display.drawLine(0, 154 + offset, 400, 154 + offset, GxEPD_RED);
-  display.drawLine(0, 155 + offset, 400, 155 + offset, GxEPD_RED);
 }
 
 //works only if wifi is connected. Prints data from openweather api.
