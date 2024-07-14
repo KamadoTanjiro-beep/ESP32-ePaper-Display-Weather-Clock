@@ -13,9 +13,7 @@
 9. Other stuffs like wire, capacitor (104), resistor (1M Ohm), connectors, switch, LED (1) etc.
     
 ## FEATURES & UPDATES V0.1.1-alpha
-1. redefined battery setting variable for better understanding
-2. debug mode disabled due to instability (will be fixed later)
-3. battery critical mode added which turns off wifi, lowers cpu speed, and other UI changes when battery percent is less than 1
+[Changelog](https://github.com/KamadoTanjiro-beep/ESP32-ePaper-Display-Weather-Clock/commit/5dc709a0e5b343795bc190758548002f35fe8f6f)
 ## FEATURES V0.1.0-alpha
 1. Shows Room Temperature using Medical Grade Temperature Sensor TMP117.
 2. Humidty and Pressure using Bosch BME680
