@@ -11,7 +11,9 @@
 7. ICR (LiCoO2) 2x2200mAh Lithium Battery (Simple 18650 batteries)
 8. 2xBMS (3.7V) CuttOff at 2.5V or Higher
 9. Other stuffs like wire, capacitor (104), resistor (1M Ohm), connectors, switch, LED (1) etc.
-    
+
+## UPDATES V0.1.2-alpha
+[Changelog](https://github.com/KamadoTanjiro-beep/ESP32-ePaper-Display-Weather-Clock/commit/05175a90e57118196dd1360790bf2677fd99840c)
 ## FEATURES & UPDATES V0.1.1-alpha
 [Changelog](https://github.com/KamadoTanjiro-beep/ESP32-ePaper-Display-Weather-Clock/commit/5dc709a0e5b343795bc190758548002f35fe8f6f)
 ## FEATURES V0.1.0-alpha
