@@ -174,13 +174,11 @@ const char* PARAM_INPUT_1 = "ssid";
 const char* PARAM_INPUT_2 = "pass";
 
 //your wifi name and password
-//const char *ssid = "SonyBraviaX400";
-//const char *password = "79756622761";
 String ssid;
 String password;
 
 // openWeatherMap Api Key from your profile in account section
-String openWeatherMapApiKey = "017a22a3caeb4260fde55658d2d33abc";
+String openWeatherMapApiKey="";
 
 // Replace with your lat and lon
 String lat = "22.5895515";
@@ -193,7 +191,6 @@ Adafruit_BME680 bme;      // Initalize environmental sensor
 BH1750 lightMeter(0x23);  //Initalize light sensor
 
 GxEPD2_3C<GxEPD2_420c_Z21, GxEPD2_420c_Z21::HEIGHT> display(GxEPD2_420c_Z21(/*CS=5*/ SS, /*DC=*/3, /*RST=*/4, /*BUSY=*/5));  //400x300, UC8276
-//GxEPD2_3C<GxEPD2_420c, GxEPD2_420c::HEIGHT> display(GxEPD2_420c(/*CS=5*/ SS, /*DC=*/3, /*RST=*/4, /*BUSY=*/5));  //Initialize display
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
 //#define SEALEVELPRESSURE_HPA (1013.25)
@@ -204,10 +201,10 @@ U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 int TIME_TO_SLEEP = 900;
 
 //battery related settings
-#define battChangeThreshold 0.3
-#define battFullVol 4.19
+#define battChangeThreshold 0.15
+#define battUpperLim 4.19
 #define battHigh 4.2
-#define battLow 2.75
+#define battLow 2.9
 
 int nightFlag = 0;  //preserves data in rtc memory from deep sleep loss
 float battLevel;
@@ -231,7 +228,7 @@ float batteryLevel() {
   }
   float Vbattf = 2 * Vbatt / BATTERY_LEVEL_SAMPLING / 1000.0;  // attenuation ratio 1/2, mV --> V
   //Serial.println(Vbattf);
-  return Vbattf;
+  return (Vbattf);
 }
 
 //forward declaration
@@ -390,6 +387,12 @@ void setup() {
         Serial.println("Connection Failed");
         break;
       }
+
+      bool apiConfigExist = pref.isKey("api");
+      if (!apiConfigExist)  //create key:value pairs
+        pref.putString("api", openWeatherMapApiKey);
+
+      openWeatherMapApiKey = pref.getString("api", "");
     } else {
       //wifioff cpu speed reduced
       WiFi.disconnect(true);  // Disconnect from the network
@@ -511,8 +514,6 @@ String httpGETRequest(const char* serverName) {
 /*tempPrint function prints internal sensor based readings. If offset is provided then it shifts in y axis.
 Provide offset when wifi is not connected and online weather data cannot be printed.*/
 void tempPrint(byte offset) {
-  //sensor.setContinuousConversionMode();
-  //Serial.println("helloWorld");
   uint16_t bg = GxEPD_WHITE;
   uint16_t fg = GxEPD_BLACK;
   u8g2Fonts.setFontMode(1);          // use u8g2 transparent mode (this is default)
@@ -532,12 +533,12 @@ void tempPrint(byte offset) {
     if (tempC < lTemp)
       lTemp = tempC;
   }
-  //display.drawLine(229, 0, 229, 300, GxEPD_BLACK);
+  
   float newBattLevel = batteryLevel();
   if (newBattLevel < battLevel)  //to maintain steady decrease in battery level
     battLevel = newBattLevel;
 
-  if (((newBattLevel - battLevel) >= battChangeThreshold) || newBattLevel > battFullVol)  //to update the battery level in case of charging
+  if (((newBattLevel - battLevel) >= battChangeThreshold) || newBattLevel > battUpperLim)  //to update the battery level in case of charging
     battLevel = newBattLevel;
 
   u8g2Fonts.setFont(u8g2_font_luRS08_tf);
@@ -1327,13 +1328,13 @@ void iconBattery(byte percent) {
     display.fillRect(9, 4, 10, 6, GxEPD_BLACK);
   else if (percent >= 85 && percent < 95)  //ful-Med
     display.fillRect(10, 4, 9, 6, GxEPD_BLACK);
-  else if (percent > 50 && percent < 85)  //Med
+  else if (percent > 65 && percent < 85)  //Med
     display.fillRect(11, 4, 9, 6, GxEPD_BLACK);
-  else if (percent > 30 && percent <= 50)  //half
+  else if (percent > 40 && percent <= 65)  //half
     display.fillRect(13, 4, 7, 6, GxEPD_BLACK);
-  else if (percent > 5 && percent <= 30)  //low
+  else if (percent > 20 && percent <= 40)  //low
     display.fillRect(15, 4, 5, 6, GxEPD_BLACK);
-  else if (percent > 2 && percent <= 5)  //critical-low
+  else if (percent > 8 && percent <= 20)  //critical-low
     display.fillRect(16, 5, 3, 5, GxEPD_RED);
   else {  //near empty
     display.drawRect(8, 4, 12, 7, GxEPD_RED);
