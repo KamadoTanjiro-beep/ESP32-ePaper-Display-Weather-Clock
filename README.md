@@ -40,7 +40,7 @@ Also, it houses a LUX sensor (BH1750) for sleeping while it is dark (E-paper doe
 
 Made of old delivery card boards. :exploding_head: One-Punch Eco-Friendly Boost Ultra Pro Max :leaves: to :infinity:
 
-Supports 5V 500mA Charging (In-built from ESP32C3 Module)
+Supports 5V 1000mA Charging (TP5000 Module)
 
 USB-C based operation.
 
