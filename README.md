@@ -48,7 +48,7 @@ This clock runs on GxEPD2 Library and others. Weather icon credits: SeBassTian23
 
 Battery life: <br>
 a. Then: Full: 06/05/2024, Dead: 17/07/2024 So, 73 days or 2 month 12 Days.
-b. Now: 49 Days On Average
+b. 2nd Charge: 49 Days, 3rd Charge: 48 Days
 
 ## Picture(s)
 
